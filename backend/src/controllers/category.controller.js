@@ -20,7 +20,7 @@ export const createCategory = async (req, res) => {
   session.startTransaction();
 
   try {
-    const { name, description } = req.body;
+    const { name } = req.body;
 
     if (!name) {
       return res.status(400).json({ message: "Category name is required" });
@@ -34,7 +34,7 @@ export const createCategory = async (req, res) => {
     }
 
     const category = await Category.create(
-      [{ name, description }],
+      [{ name }],
       { session }
     );
 
