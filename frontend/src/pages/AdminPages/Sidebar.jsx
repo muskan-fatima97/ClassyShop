@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { Box, Dialog, List, ListItemButton, Typography, Button, DialogTitle, DialogContent, DialogActions } from "@mui/material";
-import CategoryPage from "./CategoryPage";
+
 
 const Sidebar = ({ selectedTab, setSelectedTab }) => {
 
   const [logoutOpen, setLogoutOpen] = useState(false);
   const handleLogout = () => {
     localStorage.removeItem("authToken");
-    window.location.href = "/login"; // or use navigate()
+    window.location.href = "/login";
   };
 
   return (
@@ -46,6 +46,26 @@ const Sidebar = ({ selectedTab, setSelectedTab }) => {
           </ListItemButton>
 
           <ListItemButton
+            selected={selectedTab === "categories"}
+            onClick={() => setSelectedTab("categories")}
+            sx={{
+              borderRadius: 1,
+              bgcolor: selectedTab === "categories" ? "#12345A" : "transparent",
+            }}
+          >
+            Manage Categories
+          </ListItemButton>
+          <ListItemButton
+            selected={selectedTab === "brands"}
+            onClick={() => setSelectedTab("brands")}
+            sx={{
+              borderRadius: 1,
+              bgcolor: selectedTab === "brands" ? "#12345A" : "transparent",
+            }}
+          >
+            Manage Brands
+          </ListItemButton>
+          <ListItemButton
             selected={selectedTab === "users"}
             onClick={() => setSelectedTab("users")}
             sx={{
@@ -55,17 +75,6 @@ const Sidebar = ({ selectedTab, setSelectedTab }) => {
             }}
           >
             Users
-          </ListItemButton>
-
-          <ListItemButton
-            selected={selectedTab === "categories"}
-            onClick={() => setSelectedTab("categories")}
-            sx={{
-              borderRadius: 1,
-              bgcolor: selectedTab === "categories" ? "#12345A" : "transparent",
-            }}
-          >
-            Manage Categories
           </ListItemButton>
         </List>
       </Box>

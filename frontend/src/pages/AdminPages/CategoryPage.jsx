@@ -89,7 +89,7 @@ const CategoryPage = () => {
       } else {
         const response = await axiosAuth.post("/category/create", {
           name: categoryName,
-          description: "", // Placeholder for description
+          description: "", 
         });
 
         const newCategory = response.data.category || response.data;

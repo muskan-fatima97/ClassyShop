@@ -18,39 +18,44 @@ const flushCategoryCache = () => {
 export const createCategory = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
-  try {
-    const { name, description, gender} = req.body;
-    if (req.body.gender) {
-  const allowedGenders = ["Men", "Women", "Kids"];
-  if (!allowedGenders.includes(req.body.gender)) {
-    await session.abortTransaction();
-    session.endSession();
-    return res.status(400).json({ message: "Gender must be men, women, or kids" });
-  }
-}
 
-    // Check if category with same name AND gender exists
-    const existing = await Category.findOne({ name, gender }).session(session);
+  try {
+    const { name, description } = req.body;
+
+    if (!name) {
+      return res.status(400).json({ message: "Category name is required" });
+    }
+
+    const existing = await Category.findOne({ name }).session(session);
     if (existing) {
       await session.abortTransaction();
       session.endSession();
-      return res.status(400).json({ message: "Category with this name and gender already exists" });
+      return res.status(400).json({ message: "Category already exists" });
     }
 
-    const category = await Category.create([{ name, description, gender }], { session });
+    const category = await Category.create(
+      [{ name, description }],
+      { session }
+    );
 
     await session.commitTransaction();
     session.endSession();
 
     flushCategoryCache();
 
-    res.status(200).json({ message: "Category created successfully", category: category[0] });
+    res.status(201).json({
+      message: "Category created successfully",
+      category: category[0],
+    });
+
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
+    console.error("Create Category Error:", error);
     res.status(500).json({ message: "Internal server error", error: error.message });
   }
 };
+
 
 // GET Categories (no transaction/session, read-only)
 export const getCategory = async (req, res) => {
@@ -75,21 +80,20 @@ export const getCategory = async (req, res) => {
 export const updateCategory = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
+
   try {
     const { id } = req.params;
-    const updated = await Category.findByIdAndUpdate(id, req.body, { new: true, session });
-    if (req.body.gender) {
-  const allowedGenders = ["Men", "Women", "Kids"];
-  if (!allowedGenders.includes(req.body.gender)) {
-    await session.abortTransaction();
-    session.endSession();
-    return res.status(400).json({ message: "Gender must be men, women, or kids" });
-  }
-}
+
+    const updated = await Category.findByIdAndUpdate(
+      id,
+      req.body,
+      { new: true, session }
+    );
+
     if (!updated) {
       await session.abortTransaction();
       session.endSession();
-      return res.status(400).json({ message: "Category not found" });
+      return res.status(404).json({ message: "Category not found" });
     }
 
     await session.commitTransaction();
@@ -104,6 +108,7 @@ export const updateCategory = async (req, res) => {
     res.status(500).json({ message: "Internal server error", error: error.message });
   }
 };
+
 
 // DELETE Category (DELETE) with transaction
 export const deletedCategory = async (req, res) => {

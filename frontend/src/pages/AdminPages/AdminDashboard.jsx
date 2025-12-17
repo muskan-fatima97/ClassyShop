@@ -4,6 +4,7 @@ import Sidebar from "./Sidebar";
 import ProductsPage from "./ProductsPage";
 import UsersPage from "./UsersPage";
 import CategoryPage from "./CategoryPage";
+import BrandPage from "./BrandPage";
 
 const AdminDashboard = () => {
   const [selectedTab, setSelectedTab] = useState("products");
@@ -19,7 +20,7 @@ const AdminDashboard = () => {
         {selectedTab === "products" && <ProductsPage />}
         {selectedTab === "users" && <UsersPage />}
         {selectedTab === "categories" && <CategoryPage/>}
-        {selectedTab === "brands" && <div>Brands Page Content</div>}
+        {selectedTab === "brands" && <div><BrandPage/></div>}
       </Box>
     </Box>
   );

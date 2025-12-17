@@ -6,16 +6,17 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import axios from "axios";
 
 const BrandPage = () => {
-  const [categories, setCategories] = useState([]);
+  const [brands, setBrands] = useState([]);
   const [openModal, setOpenModal] = useState(false);
-  const [categoryName, setCategoryName] = useState("");
+  const [brandName, setBrandName] = useState("");
   const [selectedGender, setSelectedGender] = useState("");
-  const [editCategory, setEditCategory] = useState(null);
+  const [editBrand, setEditBrand] = useState(null);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState({ open: false, message: "", severity: "success" });
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  const [categoryToDelete, setCategoryToDelete] = useState(null);
-  const subCategoryOptions = ["Men", "Women", "Kids"];
+  const [brandToDelete, setBrandToDelete] = useState(null);
+
+
   const token = localStorage.getItem("authToken");
 
   const axiosAuth = axios.create({
@@ -25,92 +26,80 @@ const BrandPage = () => {
     },
   });
 
-  const fetchCategories = async () => {
+  const fetchBrands = async () => {
     setLoading(true);
     try {
-      const response = await axiosAuth.get("/category/all");
-      setCategories(response.data.categories || []);
+      const response = await axiosAuth.get("/brand/all");
+      setBrands(response.data.brands || []);
     } catch (err) {
-      console.error("Error loading categories", err);
-      alert("Failed to load categories. Make sure you are logged in.");
+      console.error("Error loading brands", err);
+      alert("Failed to load brands. Make sure you are logged in.");
     }
     setLoading(false);
   };
 
   const confirmDelete = async () => {
-    if (!categoryToDelete) return;
+    if (!brandToDelete) return;
 
     try {
-      await axiosAuth.delete(`/category/delete/${categoryToDelete._id}`);
-      setCategories(categories.filter((cat) => cat && cat._id !== categoryToDelete._id));
-      setToast({ open: true, message: "Category deleted successfully!", severity: "success" });
+      await axiosAuth.delete(`/brand/delete/${brandToDelete._id}`);
+      setBrands(brands.filter((brand) => brand && brand._id !== brandToDelete._id));
+      setToast({ open: true, message: "Brand deleted successfully!", severity: "success" });
     } catch (err) {
-      console.error("Error deleting category", err);
-      setToast({ open: true, message: "Failed to delete category", severity: "error" });
+      console.error("Error deleting brand", err);
+      setToast({ open: true, message: "Failed to delete brand", severity: "error" });
     }
 
-    setCategoryToDelete(null);
+    setBrandToDelete(null);
     setDeleteConfirmOpen(false);
   };
 
-  const handleOpenDeleteConfirm = (cat) => {
-    setCategoryToDelete(cat);
+  const handleOpenDeleteConfirm = (brand) => {
+    setBrandToDelete(brand);
     setDeleteConfirmOpen(true);
   };
 
   // Cancel delete
   const cancelDelete = () => {
-    setCategoryToDelete(null);
+    setBrandToDelete(null);
     setDeleteConfirmOpen(false);
   };
-  // const handleDelete = async (id) => {
-  //   try {
-  //     await axiosAuth.delete(`/category/delete/${id}`);
-  //     setCategories(categories.filter((cat) => cat && cat._id !== id));
-  //     setToast({ open: true, message: "Category deleted successfully!", severity: "success" });
-  //   } catch (err) {
-  //     console.error("Error deleting category", err);
-  //     setToast({ open: true, message: "Failed to delete category", severity: "error" });
-  //   }
-  // };
+ 
 
-  const handleSaveCategory = async () => {
+  const handleSaveBrand = async () => {
     // Validation
-    if (!categoryName.trim() || !selectedGender) {
-      alert("Please enter category name and select gender");
+    if (!brandName.trim() ) {
+      alert("Please enter brand name.");
       return;
     }
 
     try {
-      if (editCategory && editCategory._id) {
+      if (editBrand && editBrand._id) {
 
-        const response = await axiosAuth.put(`/category/update/${editCategory._id}`, {
-          name: categoryName,
-          gender: selectedGender,
+        const response = await axiosAuth.put(`/brand/update/${editBrand._id}`, {
+          name: brandName,
         });
 
-        setCategories(categories.map((cat) =>
-          cat && cat._id === editCategory._id
-            ? { ...cat, name: categoryName, gender: selectedGender }
-            : cat
+        setBrands(brands.map((brand) =>
+          brand && brand._id === editBrand._id
+            ? { ...brand, name: brandName}
+            : brand
         ));
 
-        setEditCategory(null);
-        setToast({ open: true, message: "Category updated successfully!", severity: "success" });
+        setEditBrand(null);
+        setToast({ open: true, message: "Brand updated successfully!", severity: "success" });
       } else {
-        const response = await axiosAuth.post("/category/create", {
-          name: categoryName,
-          gender: selectedGender,
+        const response = await axiosAuth.post("/brand/create", {
+          name: brandName,
         });
 
-        const newCategory = response.data.category || response.data;
-        setCategories([...categories, newCategory]);
-        setToast({ open: true, message: "Category created successfully!", severity: "success" });
+        const newBrand = response.data.brand || response.data;
+        setBrands([...brands, newBrand]);
+        setToast({ open: true, message: "Brand created successfully!", severity: "success" });
       }
 
       // Reset modal fields
-      setCategoryName("");
-      setSelectedGender("");
+      setBrandName("");
       setOpenModal(false);
 
     } catch (error) {
@@ -125,7 +114,7 @@ const BrandPage = () => {
 
 
   useEffect(() => {
-    fetchCategories();
+    fetchBrands();
   }, []);
 
   return (
@@ -154,15 +143,14 @@ const BrandPage = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {categories.filter(Boolean).map((cat) => (
-                <TableRow key={cat._id || cat.name}>
-                  <TableCell>{cat.name}</TableCell>
-                  <TableCell>{cat.brands ? cat.brands.join(", ") : "-"}</TableCell>
+              {brands.filter(Boolean).map((brand) => (
+                <TableRow key={brand._id || brand.name}>
+                  <TableCell>{brand.name}</TableCell>
                   <TableCell>
-                    <IconButton onClick={() => { setEditCategory(cat); setCategoryName(cat.name || ""); setSelectedGender(cat.gender || ""); setOpenModal(true); }}>
+                    <IconButton onClick={() => { setEditBrand(brand); setBrandName(brand.name || ""); setSelectedGender(brand.gender || ""); setOpenModal(true); }}>
                       <EditIcon color="primary" />
                     </IconButton>
-                    <IconButton onClick={() => handleOpenDeleteConfirm(cat)}>
+                    <IconButton onClick={() => handleOpenDeleteConfirm(brand)}>
                       <DeleteIcon color="error" />
                     </IconButton>
                   </TableCell>
@@ -178,7 +166,7 @@ const BrandPage = () => {
       >
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
-          Are you sure you want to delete "{categoryToDelete?.name}"?
+          Are you sure you want to delete "{brandToDelete?.name}"?
         </DialogContent>
         <DialogActions>
           <Button onClick={cancelDelete}>Cancel</Button>
@@ -215,31 +203,17 @@ const BrandPage = () => {
           }}
         >
           <Typography variant="h6" sx={{ mb: 2 }}>
-            {editCategory ? "Edit Category" : "Add Category"}
+            {editBrand ? "Edit Brand" : "Add Brand"}
           </Typography>
           <TextField
             fullWidth
-            label="Category Name"
-            value={categoryName}
-            onChange={(e) => setCategoryName(e.target.value)}
+            label="Brand Name"
+            value={brandName}
+            onChange={(e) => setBrandName(e.target.value)}
             sx={{ mb: 2 }}
           />
-          <TextField
-            fullWidth
-            label="Select Gender"
-            select
-            SelectProps={{ native: true }}
-            value={selectedGender}
-            onChange={(e) => setSelectedGender(e.target.value)}
-            sx={{ mb: 2 }}
-          >
-            <option value=""></option>
-            {subCategoryOptions.map((sub) => (
-              <option key={sub} value={sub}>{sub}</option>
-            ))}
-          </TextField>
-          <Button fullWidth variant="contained" onClick={handleSaveCategory}>
-            {editCategory ? "Update" : "Save"}
+          <Button fullWidth variant="contained" onClick={handleSaveBrand}>
+            {editBrand ? "Update" : "Save"}
           </Button>
         </Box>
       </Modal>
